@@ -21,6 +21,16 @@ description:         Please see the README on GitHub at <https://github.com/alex
 
 dependencies:
 - base >= 4.7 && < 5
+- binary
+- distributed-process
+- distributed-process-p2p
+- mwc-random
+- network-transport-tcp
+- optparse-applicative
+- transformers
+- time
+- vector
+
 
 library:
   source-dirs: src
