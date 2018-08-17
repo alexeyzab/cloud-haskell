@@ -1,6 +1,5 @@
 module Main where
 
-import Lib
 import CloudHaskell
 import Data.Semigroup ((<>))
 import Data.Vector (iterateN)
