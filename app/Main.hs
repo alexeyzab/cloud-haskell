@@ -1,3 +1,5 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module Main where
 
 import CloudHaskell
@@ -6,7 +8,6 @@ import Data.Vector (iterateN)
 import Data.Word (Word32)
 import System.Random.MWC (createSystemRandom, initialize, GenIO)
 import Options.Applicative
-
 
 data CommandLineArgs = CommandLineArgs
   { sendFor :: Int
