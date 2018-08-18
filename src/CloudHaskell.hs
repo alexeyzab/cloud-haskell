@@ -1,28 +1,27 @@
-{-# LANGUAGE RecordWildCards #-}
-
 module CloudHaskell where
 
-import Data.Time.Clock
+import qualified Control.Distributed.Backend.P2P as P2P
 import Control.Concurrent (threadDelay, takeMVar, putMVar)
 import Control.Distributed.Process
+import Control.Distributed.Process.Closure
 import Control.Distributed.Process.Node (initRemoteTable)
-import qualified Control.Distributed.Backend.P2P as P2P
 import Control.Monad (forever, mapM_, liftM)
-import Control.Monad.Trans.State
 import Control.Monad.Trans.Class (lift)
+import Control.Monad.Trans.State
 import System.Random.MWC (GenIO, uniformR)
 
+import CloudHaskell.ParseConfig
 import CloudHaskell.Types
 import CloudHaskell.Utility
 
-start :: Int -> Int -> GenIO -> IO ()
-start sendFor waitFor seed = do
+start :: Int -> Int -> GenIO -> Config -> IO ()
+start sendFor waitFor seed (Config host port nodes) =
   P2P.bootstrap
-    "127.0.0.1"
-    "0"
-    (const ("127.0.0.1", "0"))
+    host
+    port
+    (const (host, port))
     initRemoteTable
-    [P2P.makeNodeId "127.0.0.1:9000", P2P.makeNodeId "127.0.0.1:9001"] $ do
+    (map P2P.makeNodeId nodes) $ do
       -- A delay to discover the peers
       liftIO $ threadDelay (toMicroseconds 1)
       setupCommunication sendFor waitFor seed
@@ -48,7 +47,7 @@ sendNumbers = forever $ do
   number <- liftIO $ uniformR (0, 1) seed
   lift . say $ "Sending " ++ show number
   lift $ P2P.nsendPeers processLabel (Number number)
-  liftIO $ threadDelay (toMilliseconds 3)
+  liftIO $ threadDelay (toMilliseconds 4)
 
 -- Receive numbers and add them to AppState
 receiveNumbers :: StateT AppState Process ()
@@ -86,7 +85,7 @@ setupCommunication sendFor waitFor seed = do
 -- Use commandline args to determine when to stop sending numbers
 checkTimeout :: Int -> Int -> ProcessId -> ProcessId -> Process ()
 checkTimeout sendFor waitFor spid rpid = do
-  say $ "Seconds remaining: " ++ (show sendFor)
+  say $ "Seconds remaining: " ++ show sendFor
   liftIO $ threadDelay (toMicroseconds sendFor)
   say "Stopping"
   send spid Timeout

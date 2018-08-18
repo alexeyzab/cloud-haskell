@@ -3,6 +3,7 @@
 module Main where
 
 import CloudHaskell
+import CloudHaskell.ParseConfig
 import Data.Semigroup ((<>))
 import Data.Vector (iterateN)
 import Data.Word (Word32)
@@ -26,7 +27,7 @@ commandLineArgs =
       ( long "wait-for"
       <> metavar "INT"
       <> help "Length of the grace period in seconds" )
-    <*> (optional $ option auto
+    <*> optional (option auto
       ( long "with-seed"
       <> metavar "SEED"
       <> help "Seed for RNGs" ))
@@ -34,8 +35,9 @@ commandLineArgs =
 main :: IO ()
 main = do
   CommandLineArgs{..} <- execParser opts
+  config <- parseConfig
   seed <- maybe createSystemRandom (initialize . iterateN 255 succ) withSeed
-  start sendFor waitFor seed
+  start sendFor waitFor seed config
   where
     opts = info (commandLineArgs <**> helper)
       ( fullDesc

@@ -1,0 +1,10 @@
+# Main node's host:
+mainHost: "127.0.0.1"
+# Main node's port
+mainPort: "10300"
+
+# Nodes
+nodes:
+  - "127.0.0.1:10200"
+  - "127.0.0.1:10201"
+  - "127.0.0.1:10202"
